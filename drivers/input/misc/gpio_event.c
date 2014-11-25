@@ -19,9 +19,11 @@
 #include <linux/hrtimer.h>
 #include <linux/platform_device.h>
 #include <linux/slab.h>
-
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
 #include <linux/synaptics_i2c_rmi.h>
+#endif
+#ifdef CONFIG_BMA250_WAKE_OPTIONS
+#include <linux/bma250.h>
 #endif
 
 struct gpio_event {
@@ -170,6 +172,12 @@ static int gpio_event_probe(struct platform_device *pdev)
 			printk(KERN_INFO "[sweep2wake]: set device %s\n", input_dev->name);
 		}
 #endif
+#ifdef CONFIG_BMA250_WAKE_OPTIONS
+		if (!strcmp(input_dev->name, "keypad_8960")) {
+			flick2wake_setdev(input_dev);
+			printk(KERN_INFO "[flick2wake]: set device %s\n", input_dev->name);
+		}
+#endif
 	}
 	ip->input_devs->count = dev_count;
 	ip->info = event_info;
@@ -246,4 +254,3 @@ module_exit(gpio_event_exit);
 
 MODULE_DESCRIPTION("GPIO Event Driver");
 MODULE_LICENSE("GPL");
-
