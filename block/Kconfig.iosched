@@ -3,7 +3,7 @@ if BLOCK
 menu "IO Schedulers"
 
 config IOSCHED_NOOP
-	bool
+	tristate "Noop I/O scheduler"
 	default y
 	---help---
 	  The no-op I/O scheduler is a minimal scheduler that does basic merging
@@ -43,6 +43,14 @@ config IOSCHED_ROW
 	  according to queue priority.
 	  Most suitable for mobile devices.
 
+
+config IOSCHED_ZEN
+  	tristate "Zen I/O scheduler"
+  	default y
+  	---help---
+  	  FCFS, dispatches are back-inserted, deadlines ensure fairness.
+  	  Should work best with devices where there is no travel delay.
+
 config IOSCHED_CFQ
 	tristate "CFQ I/O scheduler"
 	# If BLK_CGROUP is a module, CFQ has to be built as module.
@@ -59,14 +67,20 @@ config IOSCHED_CFQ
 	  Note: If BLK_CGROUP=m, then CFQ can be built only as module.
 
 config IOSCHED_FIOPS
-	tristate "IOPS based I/O scheduler"
+	tristate "FIOPS based I/O scheduler"
 	default y
 	---help---
 	  This is an IOPS based I/O scheduler. It will try to distribute
           IOPS equally among all processes in the system. It's mainly for
           Flash based storage.
 
-config IOSCHED_SIO
+config IOSCHED_FIFO
+ 	 tristate "FIFO based I/O scheduler"
+ 	 default y
+ 	 ---help---
+ 	 Fifo is similar to no-op I/O scheduler and it's a minimal scheduler that does basic merging and sorting.
+
+config IOSCHED_SIMPLE
 	tristate "Simple I/O scheduler"
 	default y
 	---help---
@@ -107,14 +121,20 @@ choice
 		bool "CFQ" if IOSCHED_CFQ=y
 
 	config DEFAULT_NOOP
-		bool "No-op"
+		bool "Noop" if IOSCHED_NOOP=y
 
-	config DEFAULT_SIO
-		bool "SIO" if IOSCHED_SIO=y
+	config DEFAULT_SIMPLE
+		bool "SIMPLE" if IOSCHED_SIMPLE=y
 
-	config DEFAULT_FIOPS
-		bool "FIOPS" if IOSCHED_FIOPS=y
+ 	
+        config DEFAULT_FIFO
+                bool "fifo" if IOSCHED_FIFO=y
 
+config DEFAULT_FIOPS
+                bool "fiops" if IOSCHED_FIOPS=y
+
+	config DEFAULT_ZEN
+		bool "ZEN" if IOSCHED_ZEN=y
 endchoice
 
 config DEFAULT_IOSCHED
@@ -124,8 +144,9 @@ config DEFAULT_IOSCHED
 	default "cfq" if DEFAULT_CFQ
 	default "noop" if DEFAULT_NOOP
 	default "fiops" if DEFAULT_FIOPS
-	default "sio" if DEFAULT_SIO
-
+	default "simple" if DEFAULT_SIMPLE
+        default "fifo" if DEFAULT_FIFO
+	default "zen" if DEFAULT_ZEN
 endmenu
 
 endif
