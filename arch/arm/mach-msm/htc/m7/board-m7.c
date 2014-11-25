@@ -502,6 +502,7 @@ static void __init apq8064_reserve_fixed_area(unsigned long fixed_area_size)
 {
 #if defined(CONFIG_ION_MSM) && defined(CONFIG_MSM_MULTIMEDIA_USE_ION)
 	int ret;
+
 	if (fixed_area_size > MAX_FIXED_AREA_SIZE)
 		panic("fixed area size is larger than %dM\n",
 			MAX_FIXED_AREA_SIZE >> 20);
@@ -2520,7 +2521,11 @@ static struct platform_device msm_tsens_device = {
 static struct msm_thermal_data msm_thermal_pdata = {
 	.sensor_id = 7,
 	.poll_ms = 250,
-	.limit_temp_degC = 60,
+	#ifdef CONFIG_CPU_OVERCLOCK
+	.limit_temp_degC = 75,
+	#else
+        .limit_temp_degC = 60,
+	#endif
 	.temp_hysteresis_degC = 10,
 	.freq_step = 2,
 	.core_limit_temp_degC = 80,
@@ -3244,9 +3249,6 @@ static struct htc_battery_platform_data htc_battery_pdev_data = {
 	.chg_limit_active_mask = HTC_BATT_CHG_LIMIT_BIT_TALK |
 								HTC_BATT_CHG_LIMIT_BIT_NAVI |
 								HTC_BATT_CHG_LIMIT_BIT_THRML,
-#ifdef CONFIG_DUTY_CYCLE_LIMIT
-	.chg_limit_timer_sub_mask = HTC_BATT_CHG_LIMIT_BIT_THRML,
-#endif
 	.critical_low_voltage_mv = 3200,
 	.critical_alarm_vol_ptr = critical_alarm_voltage_mv,
 	.critical_alarm_vol_cols = sizeof(critical_alarm_voltage_mv) / sizeof(int),
@@ -3280,9 +3282,6 @@ static struct htc_battery_platform_data htc_battery_pdev_data = {
 	.igauge.get_battery_id = pm8921_get_batt_id,
 	.igauge.get_battery_soc = pm8921_bms_get_batt_soc,
 	.igauge.get_battery_cc = pm8921_bms_get_batt_cc,
-	.igauge.store_battery_data = pm8921_bms_store_battery_data_emmc,
-	.igauge.store_battery_ui_soc = pm8921_bms_store_battery_ui_soc,
-	.igauge.get_battery_ui_soc = pm8921_bms_get_battery_ui_soc,
 	.igauge.is_battery_temp_fault = pm8921_is_batt_temperature_fault,
 	.igauge.is_battery_full = pm8921_is_batt_full,
 	.igauge.get_attr_text = pm8921_gauge_get_attr_text,
@@ -4813,17 +4812,6 @@ static void __init m7_common_init(void)
 
 static void __init m7_allocate_memory_regions(void)
 {
-#ifdef CONFIG_KEXEC_HARDBOOT
-	// Reserve space for hardboot page at the end of first system ram block
-	struct membank* bank = &meminfo.bank[0];
-	phys_addr_t start = bank->start + bank->size - SZ_1M;
-	int ret = memblock_remove(start, SZ_1M);
-	if(!ret)
-		pr_info("Hardboot page reserved at 0x%X\n", start);
-	else
-		pr_err("Failed to reserve space for hardboot page at 0x%X!\n", start);
-#endif
-
 	m7_allocate_fb_region();
 }
 
