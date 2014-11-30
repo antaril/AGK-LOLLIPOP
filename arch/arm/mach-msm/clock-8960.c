@@ -3530,6 +3530,9 @@ static struct clk_freq_tbl clk_tbl_gfx3d[] = {
 	F_GFX3D(320000000, pll2,  2,  5),
 	F_GFX3D(400000000, pll2,  1,  2),
 	F_GFX3D(450000000, pll15, 1,  2),
+#ifdef CONFIG_GPU_OVERCLOCK
+	F_GFX3D(487500000, pll15, 1,  2),
+#endif
 	F_END
 };
 
@@ -3583,9 +3586,15 @@ static unsigned long fmax_gfx3d_8064ab[VDD_DIG_NUM] = {
 };
 
 static unsigned long fmax_gfx3d_8064[VDD_DIG_NUM] = {
+
 	[VDD_DIG_LOW]     = 128000000,
+
 	[VDD_DIG_NOMINAL] = 325000000,
+#ifdef CONFIG_GPU_OVERCLOCK
+	[VDD_DIG_HIGH]    = 487500000
+#else
 	[VDD_DIG_HIGH]    = 400000000
+#endif
 };
 
 static unsigned long fmax_gfx3d_8930[VDD_DIG_NUM] = {
@@ -4388,7 +4397,7 @@ static struct clk_freq_tbl clk_tbl_vpe[] = {
 	F_VPE( 96000000, pll8,  4),
 	F_VPE(100000000, pll2,  8),
 	F_VPE(160000000, pll2,  5),
-#if defined(CONFIG_MACH_M4_UL) || defined(CONFIG_MACH_T6_UL)
+#ifdef CONFIG_MACH_M4_UL
 	F_VPE(200000000, pll2,  4),
 #endif
 	F_END
@@ -4414,7 +4423,7 @@ static struct rcg_clk vpe_clk = {
 	.c = {
 		.dbg_name = "vpe_clk",
 		.ops = &clk_ops_rcg,
-#if defined(CONFIG_MACH_M4_UL) || defined(CONFIG_MACH_T6_UL)
+#ifdef CONFIG_MACH_M4_UL
 		VDD_DIG_FMAX_MAP2(LOW, 76800000, NOMINAL, 200000000),
 #else
 		VDD_DIG_FMAX_MAP2(LOW, 76800000, NOMINAL, 160000000),
@@ -4548,7 +4557,7 @@ static struct clk_freq_tbl clk_tbl_aif_osr_393[] = {
 	F_AIF_OSR( 8192000, pll4, 4, 1,  12),
 	F_AIF_OSR(12288000, pll4, 4, 1,   8),
 	F_AIF_OSR(24576000, pll4, 4, 1,   4),
-#if defined(CONFIG_MACH_M7_UL) || defined(CONFIG_MACH_M4_UL) || defined(CONFIG_MACH_T6_UL)
+#if defined(CONFIG_MACH_M7_UL) || defined(CONFIG_MACH_M4_UL)
 	F_AIF_OSR(18432000, pll4, 4, 3,  16),
 #endif
 	F_AIF_OSR(27000000, pxo,  1, 0,   0),
@@ -5343,12 +5352,9 @@ static struct clk_lookup msm_clocks_8064[] = {
 	CLK_LOOKUP("core_clk",		gsbi3_qup_clk.c,	"qup_i2c.3"),
 	CLK_LOOKUP("core_clk",		gsbi4_qup_clk.c,	"qup_i2c.4"),
 	CLK_LOOKUP("core_clk",		gsbi5_qup_clk.c,	"spi_qsd.0"),
-#ifdef CONFIG_FPR_SPI
-	CLK_LOOKUP("core_clk",		gsbi1_qup_clk.c,	"spi_qsd.1"),
-#endif
 	CLK_LOOKUP("core_clk",		gsbi5_qup_clk.c,	"qup_i2c.5"),
 	CLK_LOOKUP("core_clk",		gsbi6_qup_clk.c,	""),
-	CLK_LOOKUP("core_clk",		gsbi7_qup_clk.c,	"qup_i2c.7"),
+	CLK_LOOKUP("core_clk",		gsbi7_qup_clk.c,	""),
 	CLK_LOOKUP("core_clk",		pdm_clk.c,		""),
 	CLK_LOOKUP("mem_clk",		pmem_clk.c,		"msm_sps"),
 	CLK_LOOKUP("core_clk",          prng_clk.c,		"msm_rng.0"),
@@ -5388,9 +5394,6 @@ static struct clk_lookup msm_clocks_8064[] = {
 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	"msm_serial_hsl.1"),
 #endif
 	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,	"qup_i2c.0"),
-#ifdef CONFIG_FPR_SPI
-	CLK_LOOKUP("iface_clk",		gsbi1_p_clk.c,		"spi_qsd.1"),
-#endif
 	CLK_LOOKUP("iface_clk",		gsbi2_p_clk.c,		"qup_i2c.2"),
 #ifdef CONFIG_SERIAL_CIR
 	CLK_LOOKUP("iface_clk",		gsbi3_p_clk.c,		"msm_serial_cir.2"),
@@ -5412,7 +5415,6 @@ static struct clk_lookup msm_clocks_8064[] = {
 #else
 	CLK_LOOKUP("iface_clk",		gsbi7_p_clk.c,	"msm_serial_hsl.0"),
 #endif
-	CLK_LOOKUP("iface_clk",		gsbi7_p_clk.c,		"qup_i2c.7"),
 	CLK_LOOKUP("ref_clk",	tsif_ref_clk.c,	"msm_tspp.0"),
 	CLK_LOOKUP("iface_clk",		tsif_p_clk.c,		"msm_tspp.0"),
 	CLK_LOOKUP("iface_clk",		usb_fs1_p_clk.c,	""),
@@ -5441,7 +5443,6 @@ static struct clk_lookup msm_clocks_8064[] = {
 	CLK_LOOKUP("cam_clk",		cam0_clk.c,	"4-0020"),
 	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"4-0048"),
 	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"4-006c"),
-	CLK_LOOKUP("cam_clk",		cam1_clk.c,	"2-0048"),
 	CLK_LOOKUP("csi_src_clk",	csi0_src_clk.c,		"msm_csiphy.0"),
 	CLK_LOOKUP("csi_src_clk",	csi1_src_clk.c,		"msm_csiphy.1"),
 	CLK_LOOKUP("csi_src_clk",	csi2_src_clk.c,		"msm_csiphy.2"),
@@ -6623,11 +6624,15 @@ static void __init reg_init(void)
 			writel_relaxed(0x2B, PRNG_CLK_NS_REG);
 	}
 
+#ifndef CONFIG_GPU_OVERCLOCK_450
 	if (cpu_is_apq8064() || cpu_is_apq8064aa()) {
 		/* Program PLL15 to 975MHz with ref clk = 27MHz */
 		configure_sr_pll(&pll15_config, &pll15_regs, 0);
 	} else if (cpu_is_apq8064ab()) {
 		/* Program PLL15 to 900MHZ */
+#else
+	if (cpu_is_apq8064() || cpu_is_apq8064aa()) {
+#endif
 		pll15_config.l = 0x21 | BVAL(31, 7, 0x620);
 		pll15_config.m = 0x1;
 		pll15_config.n = 0x3;
