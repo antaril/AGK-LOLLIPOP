@@ -1,7 +1,7 @@
-/* This file is auto generated, version 7 */
+/* This file is auto generated, version 16 */
 /* SMP PREEMPT */
 #define UTS_MACHINE "arm"
-#define UTS_VERSION "#7 SMP PREEMPT Wed Dec 10 21:53:00 CET 2014"
+#define UTS_VERSION "#16 SMP PREEMPT Mon Mar 9 22:31:32 CET 2015"
 #define LINUX_COMPILE_BY "antaril"
 #define LINUX_COMPILE_HOST "Antaril-AGK-Edition"
-#define LINUX_COMPILER "gcc version 4.8 (GCC) "
+#define LINUX_COMPILER "gcc version 4.7 (GCC) "
